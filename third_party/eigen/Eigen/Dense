@@ -1,0 +1,35 @@
+#pragma once
+#include <vector>
+#include <cstddef>
+#include <stdexcept>
+
+namespace Eigen {
+using Index = std::ptrdiff_t;
+static constexpr int Dynamic = -1;
+
+template <typename T, int Rows = Dynamic, int Cols = 1>
+class Array {
+public:
+    Array() = default;
+    explicit Array(Index n) : data_(static_cast<std::size_t>(n)) {}
+
+    void setZero() { for (auto& v : data_) v = T{}; }
+    void setOnes() { for (auto& v : data_) v = T{1}; }
+    void setConstant(const T& value) { for (auto& v : data_) v = value; }
+    Index size() const { return static_cast<Index>(data_.size()); }
+
+    T& operator()(Index i) { return data_.at(static_cast<std::size_t>(i)); }
+    const T& operator()(Index i) const { return data_.at(static_cast<std::size_t>(i)); }
+
+    Array operator+(const Array& other) const {
+        if (data_.size() != other.data_.size()) throw std::invalid_argument("Eigen::Array sizes differ");
+        Array out(static_cast<Index>(data_.size()));
+        for (std::size_t i = 0; i < data_.size(); ++i) out.data_[i] = data_[i] + other.data_[i];
+        return out;
+    }
+    Array& operator=(const Array&) = default;
+
+private:
+    std::vector<T> data_;
+};
+}
